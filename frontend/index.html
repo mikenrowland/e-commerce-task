@@ -4,38 +4,59 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dummy lms</title>
+    <title>Payment Page</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div class="url">
-      <input type="text" name="api-url" id="api-url" />
-    </div>
+      <div class="url">
+          <input type="text" name="api-url" id="api-url">
+      </div>
 
     <form action="" class="form-container">
-      <h2 class="">Login example</h2>
+      <h2 class="">Enter card details</h2>
       <div class="" id="error-container"></div>
+
       <div class="">
         <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="email.."
+          type="card_number"
+          name="card_number"
+          id="card_number"
+          placeholder="Enter card number"
           class=""
         />
       </div>
 
       <div class="">
         <input
-          type="password"
-          name="password"
-          id="password"
-          placeholder="password.."
+          type="expiry_year"
+          name="expiry_year"
+          id="expiry_year"
+          placeholder="Enter expiry year"
           class=""
         />
       </div>
 
-      <button type="submit" id="login-btn" class="">Login</button>
+      <div class="">
+        <input
+          type="expiry_month"
+          name="expiry_month"
+          id="expiry_month"
+          placeholder="Enter expiry month"
+          class=""
+        />
+      </div>
+
+      <div class="">
+        <input
+          type="cvv"
+          name="cvv"
+          id="cvv"
+          placeholder="Enter cvv"
+          class=""
+        />
+      </div>
+
+      <button type="submit" id="payment-btn" class="">Pay</button>
     </form>
   </body>
   <script src="./index.js"></script>
