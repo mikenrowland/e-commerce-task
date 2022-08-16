@@ -1,12 +1,20 @@
 import re
 from datetime import date
 from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, root_validator
 regexDigit = "^[0-9]+$"
 regexLength = "^.{16,19}$"
 
 
 app = FastAPI()
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=['*'],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 current_year = date.today().year
 current_month = date.today().month
@@ -16,6 +24,23 @@ class CardSchema(BaseModel):
     expiry_year: str = Field(...)
     expiry_month: str = Field(...)
     card_cvv: str = Field(...)
+
+
+    @root_validator(pre=True)
+    @classmethod
+    def validate_input(cls, values):
+        number = values.get('card_number')
+        cvv = str(values.get('card_cvv'))
+        year = values.get('expiry_year')
+        month = values.get('expiry_month')
+
+        if not (number or cvv or year or month):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Error! All fields are required",
+            )
+        return values
+
 
     @root_validator(pre=True)
     @classmethod
@@ -70,4 +95,4 @@ def home():
 @app.post('/payment')
 def make_card_payment(data: CardSchema):
     data.expiry_month = int(data.expiry_month)
-    return{'data': data}
+    return{'message': 'Success! Payment is being processed', 'data': data}
