@@ -37,7 +37,35 @@ class CardSchema(BaseModel):
         if not (number or cvv or year or month):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Error! All fields are required",
+                detail={"error": "All fields are required"},
+            )
+        return values
+
+
+    @root_validator(pre=True)
+    @classmethod
+    def validate_number_cvv(cls, values):
+        number = values.get('card_number')
+        cvv = str(values.get('card_cvv'))
+        error_msg = None
+
+        if not re.match(regexDigit, number):
+            error_msg = {
+                "error": "Invalid! Card number must contain only integers"
+            }
+        elif not re.match(regexLength, number):
+            error_msg = {
+                "error": "Invalid! Card number must be between 16 and 19 digits"
+            }
+        elif len(cvv) < 3 or len(cvv) > 4:
+            error_msg = {"error": "Invalid! CVV Number must be 3 or 4 digits"}
+        elif (len(cvv) == 4 and number[:2] not in ['34', '37']) or \
+            (len(cvv) != 4 and number[:2] in ['34', '37']):
+            error_msg = {"error": "Invalid CVV Number"}
+        if error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_msg
             )
         return values
 
@@ -50,39 +78,20 @@ class CardSchema(BaseModel):
         error_msg = None
 
         if len(str(year)) != 4 or not re.match(regexDigit, year):
-            error_msg = f"Invalid year format '{year}', must contain 4 digits",
+            error_msg = {
+                "error": f"Invalid year format '{year}', must contain 4 digits"
+            }
         elif not re.match(regexDigit, month) or int(month) < 1 or int(month) > 12:
-            error_msg = f"Month '{month}' not valid, must be between 1 and 12",
-        elif int(year) < current_year or int(month) < current_month:
-            error_msg = "Invalid! Card Expired",
+            error_msg = {
+                "error": f"Month '{month}' not valid, must be between 1 and 12"
+            }
+        elif int(year) < current_year or \
+            (int(year) == current_year and int(month) < current_month):
+            error_msg = {"error": "Invalid! Card Expired"}
         if error_msg:    
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=error_msg,
-            )
-        return values
-    
-    @root_validator(pre=True)
-    @classmethod
-    def validate_number_cvv(cls, values):
-        number = values.get('card_number')
-        cvv = str(values.get('card_cvv'))
-        error_msg = None
-        print(len(number))
-
-        if not re.match(regexDigit, number):
-            error_msg = "Invalid! Card number must contain only integers"
-        elif not re.match(regexLength, number):
-            error_msg = "Invalid! Card number must be between 16 and 19 digits"
-        elif len(cvv) < 3 or len(cvv) > 4:
-            error_msg = "Invalid! CVV Number must be 3 or 4 digits"
-        elif (len(cvv) == 4 and number[:2] not in ['34', '37']) or \
-            (len(cvv) != 4 and number[:2] in ['34', '37']):
-            error_msg = "Invalid CVV Number"
-        if error_msg:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=error_msg
             )
         return values
 
@@ -94,5 +103,5 @@ def home():
 
 @app.post('/payment')
 def make_card_payment(data: CardSchema):
-    data.expiry_month = int(data.expiry_month)
-    return{'message': 'Success! Payment is being processed', 'data': data}
+    return {'detail': {'success': 'Card verified. Payment is being processed'}}
+    

@@ -6,7 +6,7 @@ paymentButton && paymentButton.addEventListener("click", (e) => makePayment(e));
 // handles payment
 function makePayment(e) {
   e.preventDefault();
-  paymentButton.innerHTML = "...loading";
+  // paymentButton.innerHTML = "...loading";
   const card_number = document.querySelector("#card_number").value;
   const expiry_year = document.querySelector("#expiry_year").value;
   const expiry_month = document.querySelector("#expiry_month").value;
@@ -22,24 +22,27 @@ function makePayment(e) {
     },
   };
   const path = `${apiBaseUrl}/payment`;
-  console.log(options);
   fetch(path, options)
     .then((res) => res.json())
     .then((res) => {
-      alert(JSON.stringify(res));
-      paymentButton.innerHTML = "Payment";
+      if (res.detail.error){
+        setErrorRes(JSON.stringify(res.detail.error));
+      } else if (res.detail.success){
+        setSuccessRes(JSON.stringify(res.detail.success));
+        paymentButton.innerHTML = "Processing...";
+      }  
+      // alert(JSON.stringify(res));
     })
     .catch((err) => {
       console.log(err.message);
-      setError(err.message ? err.message : JSON.stringify(error.details));
-      paymentButton.innerHTML = "Payment";
+      setErrorRes(err.message ? err.message : JSON.stringify(error.details));
+      paymentButton.innerHTML = "Pay";
     });
 }
 
+const messageContainer = document.querySelector("#message-container");
 
-function setError(message) {
-  const errorContainer = document.querySelector("#error-container");
-
+function setErrorRes(message) {
   let errorDiv = `
     <div class="" id="error-message">
         ${
@@ -50,5 +53,20 @@ function setError(message) {
     </div>
 `;
 
-  errorContainer.innerHTML = errorDiv;
+  messageContainer.innerHTML = errorDiv;
+}
+
+
+function setSuccessRes(message) {
+  let successDiv = `
+    <div class="" id="success-message">
+        ${
+          typeof message !== "string"
+            ? JSON.stringify(message, undefined, 2)
+            : message
+        }
+    </div>
+`;
+
+  messageContainer.innerHTML = successDiv;
 }
