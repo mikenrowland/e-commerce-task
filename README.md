@@ -50,3 +50,10 @@ The validation algorithm should handle the following:
 
 * cd into the frontend folder and open the index.html file in your browser
 * Fill the input fields and make a request
+
+
+#### Troubleshooting
+
+Having trouble with your requests? Try these:
+* Ensure your server is running
+* In the `index.js` file, check that the `apiBaseUrl` matches the port your server is running on
